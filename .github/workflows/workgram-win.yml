@@ -119,7 +119,7 @@ jobs:
           [System.IO.File]::WriteAllText($path, $text)
       - name: Libraries.
         run: |
-          %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat skip-release silent
+          %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat silent
 
       - name: Free up some disk space.
         shell: bash
