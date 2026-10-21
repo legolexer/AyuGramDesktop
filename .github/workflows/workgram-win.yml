@@ -107,7 +107,16 @@ jobs:
             ${{ env.LibrariesPath }}\cache_keys\[qQ]t[_-]*
           key: ${{ runner.OS }}-x64-qt-${{ env.CACHE_KEY }}
           restore-keys: ${{ runner.OS }}-x64-qt-
-
+      - name: Fix MSYS2 diffutils dependency.
+        shell: pwsh
+        run: |
+          $path = "$env:TBUILD\$env:REPO_NAME\Telegram\build\prepare\prepare.py"
+          $text = [System.IO.File]::ReadAllText($path)
+          if (-not $text.Contains("mingw-w64-x86_64-diffutils")) {
+            throw "Expected diffutils dependency not found in prepare.py"
+          }
+          $text = $text.Replace("mingw-w64-x86_64-diffutils", "diffutils")
+          [System.IO.File]::WriteAllText($path, $text)
       - name: Libraries.
         run: |
           %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat skip-release silent
