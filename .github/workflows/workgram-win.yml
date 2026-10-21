@@ -13,7 +13,7 @@ on:
 jobs:
   windows:
     name: Windows x64 Release
-    runs-on: windows-latest
+    runs-on: windows-2022
     timeout-minutes: 360
 
     env:
@@ -117,10 +117,28 @@ jobs:
           }
           $text = $text.Replace("mingw-w64-x86_64-diffutils", "diffutils")
           [System.IO.File]::WriteAllText($path, $text)
+      - name: Fix legacy ATL include path.
+        shell: pwsh
+        run: |
+          $source = Join-Path $env:VCToolsInstallDir "atlmfc\include"
+          $target = Join-Path $env:VCINSTALLDIR "atlmfc\include"
+
+          if (-not (Test-Path (Join-Path $source "atlbase.h"))) {
+            throw "ATL headers not found at $source"
+          }
+
+          if (-not (Test-Path $target)) {
+            New-Item -ItemType Directory -Force -Path (Split-Path $target) | Out-Null
+            New-Item -ItemType Junction -Path $target -Target $source | Out-Null
+          }
+
+          if (-not (Test-Path (Join-Path $target "atlbase.h"))) {
+            throw "Legacy ATL include path is still invalid: $target"
+          }
+
       - name: Libraries.
         run: |
           %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat silent
-
       - name: Free up some disk space.
         shell: bash
         run: find $LibrariesPath '(' '(' ! '(' -name '*.lib' -o -name '*.a' -o -name '*.exe' -o -name '*.h' -o -name '*.hpp' -o -name '*.inc' -o -name '*.cmake' -o -name '*.pc' -o -path '*/include/*' -o -path '*/objects-*' -o -path '*/cache_keys/*' -o -path '*/patches/*' -o -path '*/nv-codec-headers/*' ')' -type f ')' -o -empty ')' -delete
