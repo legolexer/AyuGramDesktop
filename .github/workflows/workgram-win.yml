@@ -156,7 +156,8 @@ jobs:
           -D DESKTOP_APP_DISABLE_AUTOUPDATE=ON ^
           -D DESKTOP_APP_DISABLE_CRASH_REPORTS=ON
 
-          cmake --build ..\out --config Release --parallel
+          set CL=/MP1 %CL%
+          cmake --build ..\out --config Release --parallel 1
 
       - name: Collect result.
         run: |
