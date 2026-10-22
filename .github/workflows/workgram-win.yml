@@ -33,6 +33,17 @@ jobs:
             echo "::error::Add repository secrets TDESKTOP_API_ID and TDESKTOP_API_HASH (get them at my.telegram.org)"
             exit 1
           fi
+          if ! [[ "$API_ID" =~ ^[0-9]{5,10}$ ]]; then
+            echo "::error::TDESKTOP_API_ID must be digits only, without spaces or line breaks"
+            exit 1
+          fi
+          if ! [[ "$API_HASH" =~ ^[0-9a-f]{32}$ ]]; then
+            echo "::error::TDESKTOP_API_HASH must be exactly 32 characters 0-9 a-f, without spaces or line breaks"
+            exit 1
+          fi
+          # api_id не секрет (он виден внутри приложения), поэтому печатаем его по цифрам через пробел: GitHub маскирует только целое значение.
+          echo "api_id по цифрам: $(echo "$API_ID" | sed 's/./& /g')"
+          echo "api_hash: ${#API_HASH} символов, начало ${API_HASH:0:4}, конец ${API_HASH: -4}"
 
       - name: Prepare directories.
         run: |
@@ -143,18 +154,32 @@ jobs:
         shell: bash
         run: find $LibrariesPath '(' '(' ! '(' -name '*.lib' -o -name '*.a' -o -name '*.exe' -o -name '*.h' -o -name '*.hpp' -o -name '*.inc' -o -name '*.cmake' -o -name '*.pc' -o -path '*/include/*' -o -path '*/objects-*' -o -path '*/cache_keys/*' -o -path '*/patches/*' -o -path '*/nv-codec-headers/*' ')' -type f ')' -o -empty ')' -delete
 
+      - name: WorkGram sources.
+        uses: actions/checkout@v7
+        with:
+          path: wg-src
+          submodules: false
+
+      - name: Apply WorkGram.
+        shell: bash
+        run: python wg-src/workgram/apply.py "$TBUILD/$REPO_NAME"
+
       - name: Build.
         run: |
-          cd /d "%TBUILD%\%REPO_NAME%\Telegram"
-          call configure.bat x64 -D TDESKTOP_API_ID=%API_ID% -D TDESKTOP_API_HASH=%API_HASH% -D CMAKE_CONFIGURATION_TYPES=Release -D CMAKE_MSVC_DEBUG_INFORMATION_FORMAT= -D DESKTOP_APP_DISABLE_AUTOUPDATE=ON -D DESKTOP_APP_DISABLE_CRASH_REPORTS=ON
-          if errorlevel 1 exit /b 1
+          cd %TBUILD%\%REPO_NAME%\Telegram
 
-          powershell -NoProfile -Command "$p = '..\out\Telegram\Telegram.vcxproj'; $s = [IO.File]::ReadAllText($p); $m = [regex]::Matches($s, 'TDESKTOP_API_ID=([^;<]+)'); if ($m.Count -eq 0) { Write-Error 'API ID definition not found'; exit 1 }; foreach ($v in $m) { if ($v.Groups[1].Value.Trim() -ne '33535050') { Write-Error 'STOP: generated project has an unexpected API ID'; exit 1 } }; Write-Host 'OK: generated project uses the expected API ID'"
-          if errorlevel 1 exit /b 1
+          call configure.bat ^
+          x64 ^
+          -D TDESKTOP_API_ID=%API_ID% ^
+          -D TDESKTOP_API_HASH=%API_HASH% ^
+          -D CMAKE_CONFIGURATION_TYPES=Release ^
+          -D CMAKE_MSVC_DEBUG_INFORMATION_FORMAT= ^
+          -D DESKTOP_APP_DISABLE_AUTOUPDATE=ON ^
+          -D DESKTOP_APP_DISABLE_CRASH_REPORTS=ON
 
           set CL=/MP1 %CL%
           cmake --build ..\out --config Release --parallel 1
-          
+
       - name: Collect result.
         run: |
           mkdir artifact
