@@ -4,6 +4,13 @@ import pathlib
 import shutil
 import sys
 
+# На Windows консоль по умолчанию в cp1252 и не умеет печатать русский текст: переключаем вывод на UTF-8.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 if len(sys.argv) != 2:
     sys.exit("Использование: python apply.py ПУТЬ_К_РЕПОЗИТОРИЮ")
 repo = pathlib.Path(sys.argv[1]).resolve()
