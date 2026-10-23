@@ -162,24 +162,22 @@ jobs:
 
       - name: Apply WorkGram.
         shell: bash
+        env:
+          PYTHONUTF8: "1"
         run: python wg-src/workgram/apply.py "$TBUILD/$REPO_NAME"
 
       - name: Build.
         run: |
-          cd %TBUILD%\%REPO_NAME%\Telegram
+          cd /d "%TBUILD%\%REPO_NAME%\Telegram"
+          call configure.bat x64 -D TDESKTOP_API_ID=%API_ID% -D TDESKTOP_API_HASH=%API_HASH% -D CMAKE_CONFIGURATION_TYPES=Release -D CMAKE_MSVC_DEBUG_INFORMATION_FORMAT= -D DESKTOP_APP_DISABLE_AUTOUPDATE=ON -D DESKTOP_APP_DISABLE_CRASH_REPORTS=ON
+          if errorlevel 1 exit /b 1
 
-          call configure.bat ^
-          x64 ^
-          -D TDESKTOP_API_ID=%API_ID% ^
-          -D TDESKTOP_API_HASH=%API_HASH% ^
-          -D CMAKE_CONFIGURATION_TYPES=Release ^
-          -D CMAKE_MSVC_DEBUG_INFORMATION_FORMAT= ^
-          -D DESKTOP_APP_DISABLE_AUTOUPDATE=ON ^
-          -D DESKTOP_APP_DISABLE_CRASH_REPORTS=ON
+          powershell -NoProfile -Command "$p = '..\out\Telegram\Telegram.vcxproj'; $s = [IO.File]::ReadAllText($p); $m = [regex]::Matches($s, 'TDESKTOP_API_ID=([^;<]+)'); if ($m.Count -eq 0) { Write-Error 'API ID definition not found'; exit 1 }; foreach ($v in $m) { if ($v.Groups[1].Value.Trim() -ne '33535050') { Write-Error 'STOP: generated project has an unexpected API ID'; exit 1 } }; Write-Host 'OK: generated project uses the expected API ID'"
+          if errorlevel 1 exit /b 1
 
           set CL=/MP1 %CL%
           cmake --build ..\out --config Release --parallel 1
-
+          
       - name: Collect result.
         run: |
           mkdir artifact
