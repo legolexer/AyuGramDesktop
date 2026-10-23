@@ -164,7 +164,8 @@ jobs:
         shell: bash
         env:
           PYTHONUTF8: "1"
-        run: python wg-src/workgram/apply.py "$TBUILD/$REPO_NAME"
+          PYTHONIOENCODING: "utf-8"
+        run: python -X utf8 wg-src/workgram/apply.py "$TBUILD/$REPO_NAME"
 
       - name: Build.
         run: |
