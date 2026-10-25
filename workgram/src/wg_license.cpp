@@ -9,9 +9,9 @@
 #include <QJsonObject>
 #include <QLabel>
 #include <QLineEdit>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkReply>
+#include <QtNetwork/QNetworkRequest>
 #include <QPushButton>
 #include <QSysInfo>
 #include <QVBoxLayout>

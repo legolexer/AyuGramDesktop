@@ -1,6 +1,7 @@
 #include "wg_glue.h"
 
 #include <QCoreApplication>
+#include <cstdlib>
 #include <QMessageBox>
 #include <QPointer>
 #include <QSettings>

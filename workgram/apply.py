@@ -52,6 +52,10 @@ add_library(workgram_ui STATIC
     ${src_loc}/workgram/wg_glue.cpp
 )
 set_target_properties(workgram_ui PROPERTIES AUTOMOC ON)
+target_compile_features(workgram_ui PUBLIC cxx_std_17)
+if (MSVC)
+    target_compile_options(workgram_ui PRIVATE /utf-8)
+endif()
 target_include_directories(workgram_ui PUBLIC ${src_loc})
 target_link_libraries(workgram_ui PUBLIC desktop-app::external_qt desktop-app::external_openssl)
 target_link_libraries(Telegram PRIVATE workgram_ui)

@@ -137,7 +137,7 @@ QWidget *SettingsDialog::buildFeedPage() {
 		sp->setRange(lo, hi);
 		sp->setValue(value);
 		sp->setFixedWidth(110);
-		connect(sp, &QSpinBox::valueChanged, this, [this, set](int v) { set(v); changed(); });
+		connect(sp, QOverload<int>::of(&QSpinBox::valueChanged), this, [this, set](int v) { set(v); changed(); });
 		row->addWidget(sp);
 		l->addLayout(row);
 	};
@@ -182,7 +182,7 @@ QWidget *SettingsDialog::buildCollectionsPage() {
 	poll->setSuffix(S(" сек"));
 	poll->setValue(_s.pollSeconds);
 	poll->setFixedWidth(110);
-	connect(poll, &QDoubleSpinBox::valueChanged, this, [this](double v) { _s.pollSeconds = v; changed(); });
+	connect(poll, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, [this](double v) { _s.pollSeconds = v; changed(); });
 	params->addWidget(poll);
 	l->addLayout(params);
 	auto *params2 = new QHBoxLayout;
@@ -191,7 +191,7 @@ QWidget *SettingsDialog::buildCollectionsPage() {
 	lim->setRange(10, 200);
 	lim->setValue(_s.limitPerCollection);
 	lim->setFixedWidth(110);
-	connect(lim, &QSpinBox::valueChanged, this, [this](int v) { _s.limitPerCollection = v; changed(); });
+	connect(lim, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int v) { _s.limitPerCollection = v; changed(); });
 	params2->addWidget(lim);
 	l->addLayout(params2);
 
@@ -311,7 +311,7 @@ QWidget *SettingsDialog::buildTemplatePage() {
 	l->addStretch(1);
 
 	loadTemplates();
-	connect(_tplCombo, &QComboBox::currentIndexChanged, this, [this](int i) {
+	connect(_tplCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int i) {
 		if (_loading || i < 0) return;
 		_s.activeTemplate = i;
 		_loading = true;

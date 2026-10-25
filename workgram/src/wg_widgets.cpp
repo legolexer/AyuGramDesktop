@@ -139,7 +139,11 @@ void GiftCard::contextMenuEvent(QContextMenuEvent *e) {
 	else if (chosen == a3) emit blacklistRequested(int(BlackType::Item), _item);
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 void GiftCard::enterEvent(QEnterEvent *) { _hover = true; update(); }
+#else
+void GiftCard::enterEvent(QEvent *) { _hover = true; update(); }
+#endif
 void GiftCard::leaveEvent(QEvent *) { _hover = false; update(); }
 
 // ---------------- GiftStrip ----------------
