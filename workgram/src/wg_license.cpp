@@ -1,5 +1,7 @@
 #include "wg_license.h"
 
+#include "wg_log.h"
+
 #include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QDateTime>
@@ -139,6 +141,7 @@ void LicenseClient::check() {
 	connect(reply, &QNetworkReply::finished, this, [this, reply] {
 		reply->deleteLater();
 		if (reply->error() != QNetworkReply::NoError) {
+			Log("license: network error: " + reply->errorString());
 			finish(LicenseStatus::NetworkError);
 			return;
 		}
@@ -155,6 +158,7 @@ void LicenseClient::check() {
 		int days = 0;
 		qint64 exp = 0;
 		if (!verifyToken(token, _config.publicKeyHex, _hwid, QDateTime::currentSecsSinceEpoch(), &days, &exp)) {
+			Log("license: bad signature");
 			finish(LicenseStatus::BadSignature);
 			return;
 		}
@@ -181,6 +185,7 @@ bool LicenseClient::checkBlocking(int timeoutMs) {
 KeyDialog::KeyDialog(LicenseClient *client, QWidget *parent) : QDialog(parent), _client(client) {
 	setWindowTitle("WorkGram");
 	setModal(true);
+	setWindowFlag(Qt::WindowStaysOnTopHint, true);
 	setFixedSize(440, 260);
 	setStyleSheet("QDialog{background:#17212b;} QLabel{color:#fff;font-size:14px;}"
 		"QLineEdit{background:#242f3d;color:#fff;border:0;border-radius:8px;padding:8px 12px;font-size:15px;}"

@@ -77,11 +77,9 @@ patch(mw, "\t} break;\n\n\tcase QEvent::MouseMove: {\n",
 """, "WorkGram: F9", after=False)
 
 app = repo / "Telegram" / "SourceFiles" / "core" / "application.cpp"
-patch(app, '#include "core/application.h"\n', '#include "workgram/wg_glue.h"\n#include <cstdlib>\n', "workgram/wg_glue.h")
+patch(app, '#include "core/application.h"\n', '#include "workgram/wg_glue.h"\n', "workgram/wg_glue.h")
 patch(app, "void Application::run() {\n",
-      """\t// WorkGram: без подтверждённого ключа приложение не запускается.
-\tif (!WorkGram::EnsureLicense()) {
-\t\tstd::exit(0);
-\t}
+      """\t// WorkGram: проверка ключа. Ничего не блокирует: окно ключа появится после запуска, без ключа приложение закроется.
+\tWorkGram::StartLicense();
 
-""", "WorkGram::EnsureLicense")
+""", "WorkGram::StartLicense")

@@ -8,7 +8,9 @@ namespace WorkGram {
 // F9: показать или скрыть окно настроек WorkGram.
 void ToggleSettings(QWidget *parent);
 
-// Запуск: спрашивает ключ, если он не подтверждён. false = закрыть приложение.
-bool EnsureLicense();
+// Запуск: проверяет ключ и, если нужно, показывает окно ввода. Ничего не блокирует; без ключа приложение закроется.
+void StartLicense();
+bool LicenseStarted();
+bool ExitRequested();      // приложение попросило закрыться (ключ перестал действовать)
 
 } // namespace WorkGram
