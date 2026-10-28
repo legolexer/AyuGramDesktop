@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QString>
 #include <QTimer>
+#include <functional>
 
 class QLabel;
 class QLineEdit;
@@ -25,6 +26,8 @@ struct LicenseInfo {
 	LicenseStatus status = LicenseStatus::Unknown;
 	int daysLeft = 0;
 	qint64 tokenExp = 0;        // до какого момента (unix) действует токен
+	QString message;            // понятная причина, если связь не удалась
+	QString detail;             // технические подробности для журнала
 	QString token;
 	UpdateInfo update;
 };
@@ -49,8 +52,12 @@ public:
 	const QString &hwid() const { return _hwid; }
 	void setIdentity(qint64 tgId, const QString &username) { _tgId = tgId; _username = username; }
 	void setCachedToken(const QString &token);    // токен с прошлого запуска: даёт работать без сети до его срока
+	void setProxyUrl(const QString &url) { _proxyUrl = url.trimmed(); }   // необязательно: socks5://127.0.0.1:1443 или http://...
+	const QString &proxyUrl() const { return _proxyUrl; }
 
 	void check();                                  // один запрос на сервер
+	// Предложение разработчику. done(успех, сообщение для пользователя).
+	void sendSuggestion(const QString &text, std::function<void(bool, QString)> done);
 	bool checkBlocking(int timeoutMs);             // то же, но ждёт ответа
 	void startPinging(int seconds = 90);
 
@@ -62,9 +69,12 @@ signals:
 
 private:
 	void finish(LicenseStatus status);
+	void send(const QByteArray &body, int attempt, int total, int start, const QString &firstReason);
+	void postSuggestion(const QByteArray &body, int attempt, std::function<void(bool, QString)> done);
 
 	Config _config;
-	QString _key, _hwid, _username;
+	QString _key, _hwid, _username, _proxyUrl;
+	int _lastGood = 0;
 	qint64 _tgId = 0;
 	LicenseInfo _info;
 	QNetworkAccessManager *_net = nullptr;
@@ -79,7 +89,7 @@ public:
 	explicit KeyDialog(LicenseClient *client, QWidget *parent = nullptr);
 private:
 	LicenseClient *_client = nullptr;
-	QLineEdit *_edit = nullptr;
+	QLineEdit *_edit = nullptr, *_proxy = nullptr;
 	QLabel *_status = nullptr;
 	QPushButton *_login = nullptr;
 };

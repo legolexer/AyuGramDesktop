@@ -26,6 +26,8 @@ struct FeedItem {
 	int64_t sellerId = 0;
 	std::string sellerUsername;           // без @, может быть пустым
 	std::optional<int64_t> priceStars;    // у апгрейдов цены нет
+	std::optional<int64_t> priceNanoTon;  // если лот продаётся только за TON (gram), в нано-единицах
+	std::string ownerName;                // имя владельца, если Telegram отдал только его
 	Kind kind = Kind::Market;
 	bool seen = false;                    // true после открытия карточки
 	uint32_t backdropCenter = 0xFF2F7D4F; // цвета фона подарка (ARGB)

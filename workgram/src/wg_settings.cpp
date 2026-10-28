@@ -58,6 +58,11 @@ SettingsDialog::SettingsDialog(const Settings &s, const Blacklist &bl, QWidget *
 
 void SettingsDialog::showPage(int i) { _nav->setCurrentRow(i); }
 
+void SettingsDialog::setBlacklist(const Blacklist &bl) {
+	_bl = bl;
+	refreshBlacklist();
+}
+
 void SettingsDialog::changed() {
 	if (!_loading) emit settingsChanged(_s);
 }

@@ -86,6 +86,7 @@ public:
 	void setKeyInfo(const QString &key, int daysLeft, const QString &device);
 	void setMonitoringStatus(const QString &text, bool running);
 	void showPage(int index);
+	void setBlacklist(const Blacklist &bl);
 	const Settings &settings() const { return _s; }
 	const Blacklist &blacklist() const { return _bl; }
 signals:

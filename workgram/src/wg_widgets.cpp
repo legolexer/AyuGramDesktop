@@ -79,8 +79,10 @@ void GiftCard::paintEvent(QPaintEvent *) {
 	f.setPixelSize(12);
 	p.setFont(f);
 	p.setPen(Qt::white);
-	const QString seller = _item.sellerUsername.empty() ? QString("id %1").arg(_item.sellerId)
-		: "@" + QString::fromStdString(_item.sellerUsername);
+	QString seller;
+	if (!_item.sellerUsername.empty()) seller = "@" + QString::fromStdString(_item.sellerUsername);
+	else if (_item.sellerId != 0) seller = QString("id %1").arg(_item.sellerId);
+	else seller = _item.ownerName.empty() ? QString::fromUtf8("владелец скрыт") : QString::fromStdString(_item.ownerName);
 	p.drawText(QRectF(4, 68, width() - 8, 16), Qt::AlignCenter,
 		QFontMetrics(f).elidedText(seller, Qt::ElideRight, width() - 8));
 
@@ -95,6 +97,9 @@ void GiftCard::paintEvent(QPaintEvent *) {
 		const qreal x0 = (width() - (tw + 16)) / 2.0;
 		p.drawText(QRectF(x0, 85, tw, 16), Qt::AlignLeft | Qt::AlignVCenter, price);
 		drawStar(p, QPointF(x0 + tw + 10, 93), 6.5, gold);
+	} else if (_item.priceNanoTon) {
+		const double gram = double(*_item.priceNanoTon) / 1e9;
+		p.drawText(QRectF(4, 85, width() - 8, 16), Qt::AlignCenter, QString::number(gram, 'f', gram < 10 ? 2 : 1) + " gram");
 	} else {
 		p.drawText(QRectF(4, 85, width() - 8, 16), Qt::AlignCenter, QString::fromUtf8("—"));
 	}
