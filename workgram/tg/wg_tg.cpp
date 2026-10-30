@@ -23,12 +23,14 @@
 #include <QtCore/QTimer>
 
 #include <algorithm>
+#include <limits>
 #include <set>
 
 namespace WorkGram::Tg {
 namespace {
 
 constexpr auto kRequestTimeoutMs = 15000;   // запрос завис: пропускаем и идём к следующей коллекции
+constexpr int kScrollEnd = std::numeric_limits<int>::max() / 256;   // то же, что QFIXED_MAX в Qt: прокрутка поля ввода в конец
 
 QString T(const char *utf8) {
 	return QString::fromUtf8(utf8);
@@ -222,7 +224,8 @@ QString OpenChatWithDraft(uint64_t peerId, const QString &text) {
 	const auto history = controller->session().data().history(id);
 	auto draft = std::make_unique<Data::Draft>();
 	draft->textWithTags.text = text;
-	draft->cursor = MessageCursor(text.size(), text.size(), QFIXED_MAX);
+	const auto end = int(text.size());
+	draft->cursor = MessageCursor(end, end, kScrollEnd);
 	history->setLocalDraft(std::move(draft));         // текст лежит в поле ввода, отправляет человек сам
 	controller->showPeerHistory(id);
 	return QString();
